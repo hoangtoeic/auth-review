@@ -72,3 +72,62 @@ export class updateUserDto{
   @IsIn([ROLE.ADMIN, ROLE.SUPERADMIN, ROLE.USER])
   roleName?: ROLE
 }
+
+
+export class loginDto {
+  @IsNotEmpty()
+  @IsEmail()  
+  email: string;
+
+ 
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(32)
+  @Matches(new RegExp(
+    '(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})'
+  ), {
+    message:
+      'Password must have at least 8 character, including number, letter and special characters'
+  })
+  password: string
+
+}
+
+export class ForgotPasswordDto {
+  @IsNotEmpty()
+  @IsEmail()  
+  email: string;
+}
+
+
+export class resetPasswordDto {
+  @IsNotEmpty()
+  @IsEmail()  
+  email: string;
+
+ 
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(32)
+  @Matches(new RegExp(
+    '(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})'
+  ), {
+    message:
+      'Password must have at least 8 character, including number, letter and special characters'
+  })
+  oldPassword: string
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(32)
+  @Matches(new RegExp(
+    '(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})'
+  ), {
+    message:
+      'Password must have at least 8 character, including number, letter and special characters'
+  })
+  newPassword: string
+
+}

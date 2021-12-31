@@ -25,4 +25,10 @@ export class User extends BaseEntity{
 
   @Column({name: 'roleName',type: "enum",enum: ROLE})
   roleName!: ROLE
+  
+  @Column()
+    refreshtoken:string;
+ 
+ @Column()
+    refreshtokenexpires:string;
 }
