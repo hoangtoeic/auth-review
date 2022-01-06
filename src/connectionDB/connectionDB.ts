@@ -14,6 +14,6 @@ export  async function ConnectionDB(): Promise<Connection> {
     entities: [User],
     synchronize: false,
 });
-//console.log('call')
- return  await connection.connect(); // performs connection
+
+ return  await connection.connect(); 
 }

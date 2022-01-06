@@ -4,14 +4,14 @@
   "port": 5432,
   "username": "postgres",
   "password": "14121999aA",
-  "database": "test4",
+  "database": "test5",
   "logging": false,
   "entities": ["dist/db/entities/*.{ts,js}"],
   "migrations": ["src/db/migrations/*.{ts,js}"],
-  "subscribers": ["src/db/subscriber/**/*.ts"],
+  "subscribers": ["dist/db/subscriber/**/*.ts"],
   "cli": {
-    "entitiesDir": "src/db/entities",
+    "entitiesDir": "dist/db/entities",
     "migrationsDir": "src/db/migrations",
-    "subscribersDir": "src/db/subscriber"
+    "subscribersDir": "dist/db/subscriber"
   }
 }

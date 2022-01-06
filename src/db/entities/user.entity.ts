@@ -1,5 +1,9 @@
-import { Entity,BaseEntity  } from 'typeorm';
+import { join } from 'path/posix';
+import { Entity,BaseEntity, JoinColumn, ManyToMany, OneToMany, OneToOne  } from 'typeorm';
 import { Column, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Role } from './role.entity';
+import { Token } from './token.entity';
+import { UserRole } from './user-role.entity';
 
 export enum ROLE{
   USER = 'USER',
@@ -23,12 +27,18 @@ export class User extends BaseEntity{
   @Column()
   password!: string
 
-  @Column({name: 'roleName',type: "enum",enum: ROLE})
-  roleName!: ROLE
+  // @Column({name: 'roleName',type: "enum",enum: ROLE})
+  // roleName!: ROLE
   
-  @Column()
-    refreshtoken:string;
+  // @Column()
+  // refreshToken: string;
  
- @Column()
-    refreshtokenexpires:string;
+  // @Column()
+  // refreshTokenExpired: string;
+
+  @OneToMany(() => UserRole, userRole => userRole.user)
+  userRole: UserRole[]
+
+  @OneToOne(() => Token, token => token.user)
+  token: Token
 }

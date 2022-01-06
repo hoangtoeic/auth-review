@@ -35,12 +35,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     .from( User, "User")
     .where("email = :email", { email }).getOne();
     
-    if(payload.user.refreshToken != user.refreshtoken){
+    if(payload.user.refreshToken != user.refreshToken){
       throw new UnauthorizedException();
   }
-  if( new Date() > new Date(user.refreshtokenexpires)){
-    throw new UnauthorizedException();
-  }
+  // if( new Date() > new Date(user.refreshtokenexpires)){
+  //   throw new UnauthorizedException();
+  // }
 
     if(!user)
     {
