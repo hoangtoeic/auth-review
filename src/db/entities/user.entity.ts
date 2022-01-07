@@ -15,7 +15,7 @@ export class User extends BaseEntity{
   @PrimaryGeneratedColumn('uuid')
   id: number
 
-  @Column()
+  @Column({unique: true})
   email!: string
 
   @Column()

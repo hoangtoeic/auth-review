@@ -13,10 +13,10 @@ export class Role extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: number
 
-  @Column({name: 'name',type: "enum",enum: ROLE})
+  @Column({name: 'name',type: "enum",enum: ROLE, unique: true})
   name!: ROLE
 
   @OneToMany(() => UserRole, userRole => userRole.role,
-   {cascade: true})
+   )
    userRole: UserRole[]
 }

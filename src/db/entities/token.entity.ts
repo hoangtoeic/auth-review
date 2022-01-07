@@ -18,6 +18,9 @@ export class Token extends BaseEntity {
   @Column()
   resetTokenExpired: string
 
+  @Column()
+  userId: number
+
   @OneToOne(() => User, user => user.token)
   @JoinColumn({name: 'userId'})
   user: User

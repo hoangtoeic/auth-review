@@ -131,3 +131,9 @@ export class resetPasswordDto {
   newPassword: string
 
 }
+
+export class createRoleDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+}

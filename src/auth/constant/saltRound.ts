@@ -1,3 +1,3 @@
 export const saltRoundConstants = {
-  saltRounds : 5
+  saltRounds : 10
 }

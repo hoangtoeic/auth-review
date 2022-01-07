@@ -7,7 +7,7 @@
   "database": "test5",
   "logging": false,
   "entities": ["dist/db/entities/*.{ts,js}"],
-  "migrations": ["src/db/migrations/*.{ts,js}"],
+  "migrations": ["src/db/migrations/*.{js}"],
   "subscribers": ["dist/db/subscriber/**/*.ts"],
   "cli": {
     "entitiesDir": "dist/db/entities",

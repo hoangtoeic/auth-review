@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Roles } from './decorator/roles.decorator';
-import { ForgotPasswordDto, loginDto, RegisterDto, resetPasswordDto, updateUserDto } from './dto';
+import { createRoleDto, ForgotPasswordDto, loginDto, RegisterDto, resetPasswordDto, updateUserDto } from './dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -12,6 +12,12 @@ constructor(private readonly authService: AuthService){}
   register(@Body(ValidationPipe) payload: RegisterDto) {
     return this.authService.register(payload)
   }
+
+  @Post('/createRole')
+  createRole(@Body(ValidationPipe) payload: createRoleDto) {
+    return this.authService.createRole(payload)
+  }
+
 
   // @Delete('/:id') 
   // deleteUser(@Param('id') id: number) {

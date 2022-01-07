@@ -15,8 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
-      passReqToCallback:true
-
+      passReqToCallback:true   
     });
   }
 
@@ -35,9 +34,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     .from( User, "User")
     .where("email = :email", { email }).getOne();
     
-    if(payload.user.refreshToken != user.refreshToken){
-      throw new UnauthorizedException();
-  }
+  //   if(payload.user.refreshToken != user.refreshToken){
+  //     throw new UnauthorizedException();
+  // }
   // if( new Date() > new Date(user.refreshtokenexpires)){
   //   throw new UnauthorizedException();
   // }
