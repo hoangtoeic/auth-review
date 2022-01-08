@@ -16,14 +16,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   handleRequest(err, user, info) {
     console.log('JwtAuthGuard-user',user)
-    // You can throw an exception based on either "info" or "err" arguments
+    
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
     if (!this.roles) {
       return true;
     }
-    if (this.roles.includes(user.roleName)) {
+    if (this.roles.includes(user.scope)) {
       return user
     }
     throw new ForbiddenException();

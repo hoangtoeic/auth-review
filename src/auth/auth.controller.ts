@@ -29,43 +29,15 @@ constructor(private readonly authService: AuthService){}
     return this.authService.forgotPassword(payload);
   }
 
-  // @Delete('/:id') 
-  // deleteUser(@Param('id') id: number) {
-  //   return this.authService.deleteUser(id)
-  // }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('ADMIN','USER','SUPERADMIN')
-  // @Patch('/:id')
-  // updateUser(@Param('id') id: number, @Body(ValidationPipe) updateUserDto: updateUserDto){
-  //  return this.authService.UpdateUser(id, updateUserDto)
-  // }
-
   @Post('login')
   async login(@Body(ValidationPipe) loginDto:loginDto): Promise<any> {
     return this.authService.login(loginDto);
   }
 
-  // @Post('testAdmin/:id')
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('ADMIN','SUPERADMIN')
-  //   async findUser(@Param('id') id: number) {
-  //    return this.authService.findUserbyID(id)
-  //   }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('ADMIN','USER','SUPERADMIN')
-  // @Patch('resetpassword/:id')
-  //   resetPassword(@Param('id') id: number, @Body(ValidationPipe) resetPassword: resetPasswordDto){
-  //    return this.authService.resetPassword(id, resetPassword)
-  //   }
-
-  // @UseGuards(JwtAuthGuard)
-  // @Roles('ADMIN','USER','SUPERADMIN')
-  // @Patch('forgotpassword/:id')
-  //   forgotPassword( forgotPassword: ForgotPasswordDto){
-  //    return this.authService.forgotPassword(forgotPassword)
-  //   }
-
- 
+  @Post('testAuth/:id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('ADMIN','SUPERADMIN')
+    async testAuth(@Param('id') id: number) {
+     return {message: "testAuth"}
+    }
 }

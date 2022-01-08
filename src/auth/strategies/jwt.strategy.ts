@@ -20,17 +20,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<User> {
-    console.log('JwtStrategy-payload',payload)
     const email= payload.user.email
-    console.log('JwtStrategy-email',email)
-    
     const user = await getManager()
     .createQueryBuilder(User, 'User')
     .where('email = :email', { email: email })
     .getOne();
-    
-    if(!user)
-    {
+    if(!user) {
       throw new UnauthorizedException();
     }
     console.log(user)

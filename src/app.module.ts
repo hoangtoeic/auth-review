@@ -7,19 +7,6 @@ import { User } from './db/entities/user.entity';
 
 @Module({
    imports: [AuthModule,
-  // TypeOrmModule.forRoot(
-  //   {
-  //   name: 'test4-connection',
-  //   type: 'postgres',
-  //   host:'localhost',
-  //   port:5432,
-  //   username: 'postgres',
-  //   password: '14121999aA',
-  //   database: 'test2',
-  //   entities: [User],
-  //   synchronize: false,
-  //   }
-  //   ),
   ],
   controllers: [AppController],
   providers: [AppService],
