@@ -137,3 +137,28 @@ export class createRoleDto {
   @IsString()
   name: string;
 }
+
+export class RefreshTokenDto {
+  @IsNotEmpty()
+  @IsString()
+  refreshToken: string;
+}
+
+export class ResetPasswordDto {
+  
+  
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(32)
+  @Matches(new RegExp(
+    '(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})'
+  ), {
+    message:
+      'Password must have at least 8 character, including number, letter and special characters'
+  })
+  newPassword: string
+  
+  @IsNotEmpty()
+  @IsString()
+  resetPasswordToken: string;
+  }

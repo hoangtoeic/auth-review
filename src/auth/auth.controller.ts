@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Roles } from './decorator/roles.decorator';
-import { createRoleDto, ForgotPasswordDto, loginDto, RegisterDto, resetPasswordDto, updateUserDto } from './dto';
+import { createRoleDto, ForgotPasswordDto, loginDto, RefreshTokenDto, RegisterDto, ResetPasswordDto, resetPasswordDto, updateUserDto } from './dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -9,15 +9,25 @@ export class AuthController {
 constructor(private readonly authService: AuthService){}
 
   @Post('/register')
-  register(@Body(ValidationPipe) payload: RegisterDto) {
+  register(@Body(ValidationPipe) payload: RegisterDto): Promise<any> {
     return this.authService.register(payload)
   }
 
-  @Post('/createRole')
-  createRole(@Body(ValidationPipe) payload: createRoleDto) {
-    return this.authService.createRole(payload)
+  @Post('/refreshToken')
+  refreshToken(@Body() payload: RefreshTokenDto): Promise<any> {
+    return this.authService.refreshToken(payload)
   }
 
+  @Post('/resetPassword')
+  resetPassword(@Body() payload: ResetPasswordDto): Promise<any> {
+    return this.authService.resetPassword(payload);
+  }
+
+  
+  @Post('/forgotPassword')
+  forgotPassword(@Body() payload: ForgotPasswordDto): Promise<any> {
+    return this.authService.forgotPassword(payload);
+  }
 
   // @Delete('/:id') 
   // deleteUser(@Param('id') id: number) {
@@ -31,10 +41,10 @@ constructor(private readonly authService: AuthService){}
   //  return this.authService.UpdateUser(id, updateUserDto)
   // }
 
-  // @Post('login')
-  // async login(@Body(ValidationPipe) loginDto:loginDto): Promise<{accessToken: string}> {
-  //   return this.authService.login(loginDto);
-  // }
+  @Post('login')
+  async login(@Body(ValidationPipe) loginDto:loginDto): Promise<any> {
+    return this.authService.login(loginDto);
+  }
 
   // @Post('testAdmin/:id')
   // @UseGuards(JwtAuthGuard)

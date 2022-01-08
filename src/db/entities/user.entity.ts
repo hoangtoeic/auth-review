@@ -27,15 +27,6 @@ export class User extends BaseEntity{
   @Column()
   password!: string
 
-  // @Column({name: 'roleName',type: "enum",enum: ROLE})
-  // roleName!: ROLE
-  
-  // @Column()
-  // refreshToken: string;
- 
-  // @Column()
-  // refreshTokenExpired: string;
-
   @OneToMany(() => UserRole, userRole => userRole.user)
   userRole: UserRole[]
 
