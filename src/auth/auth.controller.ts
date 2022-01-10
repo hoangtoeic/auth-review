@@ -34,10 +34,16 @@ constructor(private readonly authService: AuthService){}
     return this.authService.login(loginDto);
   }
 
-  @Post('testAuth/:id')
+  @Post('testAuthor/:id')
   @UseGuards(JwtAuthGuard)
   @Roles('ADMIN','SUPERADMIN')
-    async testAuth(@Param('id') id: number) {
-     return {message: "testAuth"}
+    async testAuthor(@Param('id') id: number) {
+     return {message: "testAuthor"}
+    }
+
+  @Post('testAuthen/:id')
+  @UseGuards(JwtAuthGuard)
+    async testAuthen(@Param('id') id: number) {
+     return {message: "testAuthen"}
     }
 }

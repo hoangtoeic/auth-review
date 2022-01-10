@@ -20,7 +20,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any): Promise<any> {
-    console.log("JwtStrategy",payload)
     const email= payload.email
     const scope = payload.scope
     const user = await getManager()
