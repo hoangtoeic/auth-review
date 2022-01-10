@@ -181,13 +181,9 @@ export class AuthService {
         if (!user) {
           throw new HttpException('Login failed', 400);
         }
-       
-        const passwordHash = await bcrypt.hash(
+        const isPasswordCorrect = await bcrypt.compareSync(
           password,
-          saltRoundConstants.saltRounds,
-        );
-        
-        const isPasswordCorrect = await bcrypt.compare(user.password,passwordHash)
+          user.password)
         
         if (!isPasswordCorrect) {
           throw new HttpException('wrong password, please try again', 400);
@@ -301,9 +297,9 @@ export class AuthService {
         saltRoundConstants.saltRounds,
       );
 
-      const isDuplicatedPassword = await bcrypt.compare(
+      const isDuplicatedPassword = await bcrypt.compareSync(
         user.password,
-        passwordHash,
+        newPassword,
       );
       if (isDuplicatedPassword) {
         throw new HttpException(

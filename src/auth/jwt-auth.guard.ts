@@ -1,6 +1,9 @@
 import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { Role } from 'src/db/entities/role.entity';
+import { User } from 'src/db/entities/user.entity';
+import { getManager } from 'typeorm';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -28,4 +31,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
     throw new ForbiddenException();
   }
+
+
 }

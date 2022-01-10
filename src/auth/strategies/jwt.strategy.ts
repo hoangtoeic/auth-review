@@ -15,12 +15,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
-      passReqToCallback:true   
+      //passReqToCallback:true   
     });
   }
 
-  async validate(payload: any): Promise<User> {
-    const email= payload.user.email
+  async validate(payload: any): Promise<any> {
+    console.log("JwtStrategy",payload)
+    const email= payload.email
+    const scope = payload.scope
     const user = await getManager()
     .createQueryBuilder(User, 'User')
     .where('email = :email', { email: email })
@@ -28,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if(!user) {
       throw new UnauthorizedException();
     }
-    console.log(user)
-    return user;
+    
+    return {...user, scope};
   }
 }
