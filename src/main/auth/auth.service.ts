@@ -1,52 +1,30 @@
+import { HttpException, Injectable } from '@nestjs/common';
 import {
-  BadRequestException,
-  ForbiddenException,
-  HttpException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
-import {
-  createRoleDto,
   ForgotPasswordDto,
-  loginDto,
+  LoginDto,
   RefreshTokenDto,
   RegisterDto,
   ResetPasswordDto,
-  resetPasswordDto,
-  updateUserDto,
 } from './dto';
-import {
-  createQueryBuilder,
-  getConnection,
-  getManager,
-  getRepository,
-} from 'typeorm';
+import { createQueryBuilder, getManager, getRepository } from 'typeorm';
 import { User } from 'src/db/entities/user.entity';
-import { ConnectionDB } from 'src/connectionDB/connectionDB';
-import {
-  ConnectionManager,
-  Repository,
-  Connection,
-  EntityManager,
-} from 'typeorm';
-import {
-  InjectRepository,
-  InjectConnection,
-  InjectEntityManager,
-} from '@nestjs/typeorm';
-import { use } from 'passport';
-import { targetModulesByContainer } from '@nestjs/core/router/router-module';
+import { EntityManager } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from 'jsonwebtoken';
-import { suid } from 'rand-token';
 import { saltRoundConstants } from './constant/saltRound';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import { nanoid } from 'nanoid';
 import { Token } from 'src/db/entities/token.entity';
-import { ROLE, Role } from 'src/db/entities/role.entity';
+import { Role } from 'src/db/entities/role.entity';
 import { UserRole } from 'src/db/entities/user-role.entity';
+import {
+  RegisterResponse,
+  UserData,
+} from './interface/registerResponse.interface';
+import { RefreshTokenResponse } from './interface/refreshTokenResponse.interface';
+import { LoginResponse } from './interface/loginResponse.interface';
+import { setTimeRefreshTokenExpired, setTimeResetTokenExpired } from 'src/utils/dateTime';
+import { passwordUtil } from 'src/utils/password';
 
 const userPickFields = ['id', 'email', 'firstName', 'lastName'];
 
@@ -78,14 +56,9 @@ export class AuthService {
       ? getOldRefreshToken.refreshToken
       : nanoid(12);
 
-    const year = new Date().getFullYear();
-    const month = new Date().getMonth();
-    const day = new Date().getDate();
-    const setTimeRefreshTokenExpired = new Date(year + 1, month, day);
-
     const refreshTokenExpired = getOldRefreshToken
       ? getOldRefreshToken.refreshTokenExpired
-      : setTimeRefreshTokenExpired.toISOString();
+      : setTimeRefreshTokenExpired()
     return {
       accessToken,
       refreshToken,
@@ -113,10 +86,8 @@ export class AuthService {
     }
 
     return await getManager().transaction(async (entityManager) => {
-      const passwordHash = await bcrypt.hash(
-        password,
-        saltRoundConstants.saltRounds,
-      );
+  
+      const passwordHash =await passwordUtil.generateHash(password);
       const userInsert = await entityManager.getRepository(User).save(
         User.create({
           ...payload,
@@ -130,15 +101,14 @@ export class AuthService {
           roleId: role.id,
         }),
       );
-      const jwtData = {
+      const userData: UserData = {
         ..._.pick(userInsert, userPickFields),
         scope: role.name,
       };
-
       const { accessToken, refreshToken, refreshTokenExpired } =
         await this.createTokenAndRefreshToken({
           entityManager,
-          payload: jwtData,
+          payload: userData,
           userId: userInsert.id,
         });
 
@@ -158,20 +128,21 @@ export class AuthService {
         .save(
           Token.merge(userToken ? userToken : Token.create(), upsertTokenData),
         );
-      return {
-        user: jwtData,
+      const registerResponse: RegisterResponse = {
+        user: userData,
         accessToken,
         refreshToken,
       };
+      return registerResponse;
     });
   }
 
-  async login(payload: loginDto): Promise<any> {
+  async login(payload: LoginDto): Promise<any> {
     try {
       return await getManager().transaction(async (entityManager) => {
         payload.email = payload.email.toLowerCase();
         const { email, password } = payload;
-       
+
         const user = await createQueryBuilder(User, 'User')
           .innerJoinAndSelect('User.userRole', 'userRole')
           .where('email = :email', { email })
@@ -181,23 +152,21 @@ export class AuthService {
         if (!user) {
           throw new HttpException('Login failed', 400);
         }
-        const isPasswordCorrect = await bcrypt.compareSync(
-          password,
-          user.password)
-        
+        const isPasswordCorrect = await passwordUtil.isPasswordCorrect(password, user.password)
+
         if (!isPasswordCorrect) {
           throw new HttpException('wrong password, please try again', 400);
         }
         const scopeUser = await getManager()
           .getRepository(Role)
           .findOne({ id: roleId });
-        const jwtData = {
+        const userData = {
           ..._.pick(user, userPickFields),
           scope: scopeUser.name,
         };
         const { accessToken, refreshToken, refreshTokenExpired } =
           await this.createTokenAndRefreshToken({
-            payload: jwtData,
+            payload: userData,
             userId: user.id,
           });
         const upsertUserTokenData = {
@@ -217,11 +186,12 @@ export class AuthService {
               upsertUserTokenData,
             ),
           );
-        return {
-          user: jwtData,
+        const loginResponse: LoginResponse = {
+          user: userData,
           accessToken,
           refreshToken,
         };
+        return loginResponse;
       });
     } catch (error) {
       throw error;
@@ -262,10 +232,11 @@ export class AuthService {
           payload: jwtData,
           userId: user.id,
         });
-      return {
+      const refreshTokenResponse: RefreshTokenResponse = {
         accessToken,
         refreshToken,
       };
+      return refreshTokenResponse;
     } catch (error) {
       throw error;
     }
@@ -334,48 +305,39 @@ export class AuthService {
   }
 
   async forgotPassword(payload: ForgotPasswordDto): Promise<any> {
-  try {
-    const { email } = payload
-    const user = await getManager()
-    .createQueryBuilder(User, 'User')
-    .where('email = :email', { email: email })
-    .getOne();
-    if (!user) {
-      throw new HttpException("Email not found",400)
-    }
+    try {
+      const { email } = payload;
+      const user = await getManager()
+        .createQueryBuilder(User, 'User')
+        .where('email = :email', { email: email })
+        .getOne();
+      if (!user) {
+        throw new HttpException('Email not found', 400);
+      }
       const resetToken = nanoid(12);
-      const year = new Date().getFullYear();
-      const month = new Date().getMonth();
-      const day = new Date().getDate();
-      const setTimeResetTokenExpired = new Date(year, month, day + 1);    
-      const resetTokenExpired = setTimeResetTokenExpired.toISOString()
+      const resetTokenExpired = setTimeResetTokenExpired();
 
       await getManager()
-          .createQueryBuilder(Token, 'token')
-          .update()
-          .set({
-            resetToken,
-            resetTokenExpired
-          })
-          .where('userId = :id', { id: user.id })
-          .execute();
-          const linkResetPassword = "linkResetPassword.com"
-          this.sendEmailResetPassword(
-            user.email,
-            linkResetPassword
-          );
-          return { message: 'Your reset password request has been confirmed' };
-        }
-       
-        catch (error) {
-          throw error
-    } 
+        .createQueryBuilder(Token, 'token')
+        .update()
+        .set({
+          resetToken,
+          resetTokenExpired,
+        })
+        .where('userId = :id', { id: user.id })
+        .execute();
+      const linkResetPassword = 'linkResetPassword.com';
+      this.sendEmailResetPassword(user.email, linkResetPassword);
+      return { message: 'Your reset password request has been confirmed' };
+    } catch (error) {
+      throw error;
+    }
   }
-  
 
-  async sendEmailResetPassword(email: string,linkResetPassword: string): Promise<any> {
-    // do mothing
+  async sendEmailResetPassword(
+    email: string,
+    linkResetPassword: string,
+  ): Promise<any> {
+    // do nothing
   }
 }
-
-
