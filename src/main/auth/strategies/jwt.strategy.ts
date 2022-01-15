@@ -1,7 +1,7 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import {  jwtConstants } from '../constant/jwtConstants'
+import {  jwtConstants } from '../../../utils/constant/jwtConstants'
 import { User } from 'src/db/entities/user.entity';
 import { getManager } from 'typeorm';
 

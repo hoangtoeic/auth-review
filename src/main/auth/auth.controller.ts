@@ -15,9 +15,11 @@ import {
   RegisterDto,
   ResetPasswordDto,
 } from './dto';
+import { ForgotPasswordResponse } from './interface/forgotPasswordResponse.interface';
 import { LoginResponse } from './interface/loginResponse.interface';
 import { RefreshTokenResponse } from './interface/refreshTokenResponse.interface';
 import { RegisterResponse } from './interface/registerResponse.interface';
+import { ResetPasswordResponse } from './interface/resetPasswordResponse.interface';
 import { JwtAuthGuard } from './middleware/jwt-auth.guard';
 
 @Controller('auth')
@@ -39,12 +41,12 @@ export class AuthController {
   }
 
   @Post('/resetPassword')
-  resetPassword(@Body() payload: ResetPasswordDto): Promise<String> {
+  resetPassword(@Body() payload: ResetPasswordDto): Promise<ResetPasswordResponse> {
     return this.authService.resetPassword(payload);
   }
 
   @Post('/forgotPassword')
-  forgotPassword(@Body() payload: ForgotPasswordDto): Promise<String> {
+  forgotPassword(@Body() payload: ForgotPasswordDto): Promise<ForgotPasswordResponse> {
     return this.authService.forgotPassword(payload);
   }
 

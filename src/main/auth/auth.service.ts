@@ -10,7 +10,6 @@ import { createQueryBuilder, getManager, getRepository } from 'typeorm';
 import { User } from 'src/db/entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { saltRoundConstants } from './constant/saltRound';
 import * as bcrypt from 'bcrypt';
 import * as _ from 'lodash';
 import { nanoid } from 'nanoid';
@@ -18,13 +17,15 @@ import { Token } from 'src/db/entities/token.entity';
 import { Role } from 'src/db/entities/role.entity';
 import { UserRole } from 'src/db/entities/user-role.entity';
 import {
-  RegisterResponse,
-  UserData,
+  RegisterResponse
 } from './interface/registerResponse.interface';
 import { RefreshTokenResponse } from './interface/refreshTokenResponse.interface';
 import { LoginResponse } from './interface/loginResponse.interface';
 import { setTimeRefreshTokenExpired, setTimeResetTokenExpired } from 'src/utils/dateTime';
 import { passwordUtil } from 'src/utils/password';
+import { UserData } from './interface/userData.interface';
+import { ForgotPasswordResponse } from './interface/forgotPasswordResponse.interface';
+import { ResetPasswordResponse } from './interface/resetPasswordResponse.interface';
 
 const userPickFields = ['id', 'email', 'firstName', 'lastName'];
 
@@ -66,7 +67,7 @@ export class AuthService {
     };
   }
 
-  async register(payload: RegisterDto) {
+  async register(payload: RegisterDto): Promise<RegisterResponse> {
     const { email, password, roleName } = payload;
     const checkExistedUser = await User.findOne({
       where: {
@@ -137,7 +138,7 @@ export class AuthService {
     });
   }
 
-  async login(payload: LoginDto): Promise<any> {
+  async login(payload: LoginDto): Promise<LoginResponse> {
     try {
       return await getManager().transaction(async (entityManager) => {
         payload.email = payload.email.toLowerCase();
@@ -198,7 +199,7 @@ export class AuthService {
     }
   }
 
-  async refreshToken(payload: RefreshTokenDto): Promise<any> {
+  async refreshToken(payload: RefreshTokenDto): Promise<RefreshTokenResponse> {
     try {
       const userToken = await getManager()
         .createQueryBuilder(Token, 'token')
@@ -242,7 +243,7 @@ export class AuthService {
     }
   }
 
-  async resetPassword(payload: ResetPasswordDto): Promise<any> {
+  async resetPassword(payload: ResetPasswordDto): Promise<ResetPasswordResponse> {
     try {
       const { resetPasswordToken, newPassword } = payload;
       const token = await getManager()
@@ -263,10 +264,7 @@ export class AuthService {
         .where('User.id = :id', { id: token.userId })
         .getOne();
 
-      const passwordHash = await bcrypt.hash(
-        newPassword,
-        saltRoundConstants.saltRounds,
-      );
+      const passwordHash =await passwordUtil.generateHash(newPassword);
 
       const isDuplicatedPassword = await bcrypt.compareSync(
         user.password,
@@ -297,14 +295,17 @@ export class AuthService {
         })
         .where('userId = :id', { id: user.id })
         .execute();
-
-      return { message: 'Your password has been changed' };
+        const message = 'Your password has been changed'
+      const resetPasswordResponse: ResetPasswordResponse = {
+        message
+      }
+      return resetPasswordResponse;
     } catch (error) {
       throw error;
     }
   }
 
-  async forgotPassword(payload: ForgotPasswordDto): Promise<any> {
+  async forgotPassword(payload: ForgotPasswordDto): Promise<ForgotPasswordResponse> {
     try {
       const { email } = payload;
       const user = await getManager()
@@ -328,7 +329,12 @@ export class AuthService {
         .execute();
       const linkResetPassword = 'linkResetPassword.com';
       this.sendEmailResetPassword(user.email, linkResetPassword);
-      return { message: 'Your reset password request has been confirmed' };
+      const message = 'Your reset password request has been confirmed'
+      const forgotPasswordResponse: ForgotPasswordResponse = {
+        message
+      } 
+      return forgotPasswordResponse
+      ;
     } catch (error) {
       throw error;
     }

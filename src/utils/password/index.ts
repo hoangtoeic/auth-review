@@ -1,4 +1,4 @@
-import { saltRoundConstants } from "src/main/auth/constant/saltRound";
+import { saltRoundConstants } from '../constant/saltRound'
 import * as bcrypt from 'bcrypt';
 
 class PasswordUtil {
